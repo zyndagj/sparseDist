@@ -180,6 +180,14 @@ def chebyshev(a,b):
 
 def braycurtis(a,b):
 	'''
+	Computes the Bray-Curtis distance between two 1-D sparse matrices. Implementation follows http://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.braycurtis.html#scipy.spatial.distance.braycurtis
+
+	```
+	sum(|a-b|)/sum(|a+b|)
+	```
+	
+	The Bray-Curtis distance lies in the range [0,1].
+
 	>>> a = [0,2,0,1]
 	>>> b = [1,0,3,0]
 	>>> c = [0,2,3,1]
