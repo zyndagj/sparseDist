@@ -201,15 +201,21 @@ def braycurtis(a,b):
 
 def canberra(a,b):
 	'''
+	Computes the Canberra distance, a weighted taxicab distance,
+	between two 1-D sparse matrices and returns a distance
+	value [0, Inf].
+
+	sum(|a-b|/(|a|+|b|))
+
 	>>> a = [0,2,0,1]
 	>>> b = [1,0,3,0]
 	>>> c = [0,2,3,1]
 	>>> canberra(ss.csr_matrix([a]), ss.csr_matrix([b]))
-	4
+	4.0
 	>>> canberra(ss.csr_matrix([c]), ss.csr_matrix([b]))
-	3
+	3.0
 	'''
 	_validate_svs(a,b)
 	apb = np.abs(a)+np.abs(b)
-	amb = np.abs(a-b)
+	amb = np.abs(a-b).asfptype()
 	return np.add.reduce(amb[0,apb.indices].toarray()[0]/apb.data)
