@@ -11,11 +11,11 @@ Computes the Bray-Curtis distance between two 1-D sparse matrices and returns a 
 
 http://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.braycurtis.html
 
-### Equation
+#### Equation
 ```
 sum(|a-b|)/sum(|a+b|)
 ```
-### Usage
+#### Usage
 
 | Parameter |   |
 |:---------:|:--|
