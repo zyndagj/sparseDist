@@ -97,6 +97,8 @@ def cosine(a,b):
 	0.7303200550147031
 	>>> cosine(ss.csr_matrix([[0,2,0,1]]), ss.csr_matrix([[1,0,3,0]]))
 	1.0
+	>>> cosine(ss.csr_matrix([[1,0,3,0]]), ss.csr_matrix([[1,0,3,0]])).round(3)
+	0.0
 	'''
 	_validate_svs(a,b)
 	N = svNorm(a)*svNorm(b)
@@ -128,17 +130,25 @@ def sqeuclidean(a, b):
 	return a_b.dot(a_b.transpose())
 
 def correlation(a, b):
+	'''
+	Replicates the scipy correlation distance.
+
+	>>> A = [0,2,0,1]
+	>>> B = [1,0,3,0]
+	>>> C = [0,2,3,1]
+	>>> correlation(ss.csr_matrix([A]), ss.csr_matrix([B]))
+	1.7385489458759964
+	>>> correlation(ss.csr_matrix([C]), ss.csr_matrix([B]))
+	0.45227744249483393
+	'''
 	_validate_svs(a,b)
 	amu = a.mean()
 	bmu = b.mean()
-	am = a-amu
-	bm = b-bmu
-	N = svNorm(am)*svNorm(bm)
-	dProd = am.dot(bm.transpose())
-	if dProd.nnz:
-		return 1.0-dProd.data[0]/N
-	else:
-		return 1.0
+	am = a.toarray()[0,:]-amu
+	bm = b.toarray()[0,:]-bmu
+	N = np.linalg.norm(am)*np.linalg.norm(bm)
+	dProd = np.dot(am,bm)
+	return 1.0-dProd/N
 
 def hamming(a,b):
 	'''
