@@ -122,13 +122,6 @@ def euclidean(a,b):
 	_validate_svs(a,b)
 	return svNorm(a-b)
 
-def sqeuclidean(a, b):
-	'''
-	'''
-	_validate_svs(a,b)
-	a_b = a-b
-	return a_b.dot(a_b.transpose())
-
 def correlation(a, b):
 	'''
 	Replicates the scipy correlation distance.
@@ -180,13 +173,15 @@ def chebyshev(a,b):
 	>>> A = [0,2,0,1]
 	>>> B = [1,0,3,0]
 	>>> C = [0,2,3,1]
+	>>> chebyshev(ss.csr_matrix([A]), ss.csr_matrix([A]))
+	0
 	>>> chebyshev(ss.csr_matrix([A]), ss.csr_matrix([B]))
 	3
 	>>> chebyshev(ss.csr_matrix([C]), ss.csr_matrix([B]))
 	2
 	'''
 	_validate_svs(a,b)
-	return np.max(np.abs((a-b).data))
+	return np.abs(a-b).max()
 
 def braycurtis(a,b):
 	'''
