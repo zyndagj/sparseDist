@@ -190,28 +190,36 @@ def cityblock(a,b):
 	_validate_svs(a,b)
 	return np.sum(np.abs(a-b).data)
 
-def kullbackleibler(a,b):
+def kld(a,b):
 	'''
 	Implementation of the kullback-leibler divergance.
+
+	Returns float [0,1]
+
 	>>> A = [0,2,0,1]
 	>>> B = [1,0,3,0]
-	>>> C = [0,2,3,1]
-	>>> kullbackleibler(ss.csr_matrix([A]), ss.csr_matrix([A]))
-	0
-	>>> kullbackleibler(ss.csr_matrix([A]), ss.csr_matrix([B]))
-	7
-	>>> kullbackleibler(ss.csr_matrix([B]), ss.csr_matrix([A]))
-	7
-	>>> kullbackleibler(ss.csr_matrix([C]), ss.csr_matrix([B]))
-	4
-	>>> kullbackleibler(ss.csr_matrix([B]), ss.csr_matrix([C]))
-	4
+	>>> C = [0,2,3,5]
+	>>> D = ss.csr_matrix([0.25, 0.5, 0.25])
+	>>> E = ss.csr_matrix([0.5, 0.3, 0.2])
+	>>> Af = ss.csr_matrix(A)/sum(A)
+	>>> Bf = ss.csr_matrix(B)/sum(B)
+	>>> Cf = ss.csr_matrix(C)/sum(C)
+	>>> kld(Af, Af)
+	0.0
+	>>> kld(Af, Bf)
+	1.0
+	>>> kld(Af, Cf)
+	0.66749350018123577
+	>>> kld(D,E)
+	0.13791190457156149
+	>>> kld(E,D)
+	0.14869719288733346
 	'''
 	_validate_svs(a,b)
-	
-	M = (a+b)/2.0
-	0.5*D(a,M)+0.5*D(b,M)
-	return np.sum(np.abs(a-b).data)
+	inds = np.intersect1d(a.indices, b.indices)
+	if len(inds) == 0:
+		return 1.0
+	return a[0,inds].multiply(np.log(a[0,inds]/b[0,inds])).sum()
 
 def jensenshannon(a,b):
 	'''
@@ -223,29 +231,37 @@ def jensenshannon(a,b):
 
 	>>> A = [0,2,0,1]
 	>>> B = [1,0,3,0]
-	>>> C = [0,2,3,1]
+	>>> C = [0,2,3,5]
+	>>> D = ss.csr_matrix([0.25, 0.5, 0.25])
+	>>> E = ss.csr_matrix([0.5, 0.3, 0.2])
 	>>> jensenshannon(ss.csr_matrix([A]), ss.csr_matrix([A]))
-	0
+	0.0
 	>>> jensenshannon(ss.csr_matrix([A]), ss.csr_matrix([B]))
 	7
 	>>> jensenshannon(ss.csr_matrix([B]), ss.csr_matrix([A]))
 	7
-	>>> jensenshannon(ss.csr_matrix([C]), ss.csr_matrix([B]))
+	>>> jensenshannon(D,E)
+	4
+	>>> jensenshannon(E,D)
 	4
 	>>> jensenshannon(ss.csr_matrix([B]), ss.csr_matrix([C]))
 	4
 	'''
 	_validate_svs(a,b)
 	## Check for frequencies
-	if np.abs(np.add.reduce(a.data) - 1.0) > 0.0001:
-		fA = a/np.add.reduce(a.data)
+	zero = 0.0001
+	if np.abs(a.sum() - 1.0) > zero:
+		fA = a/a.sum()
 	else: fA = a
-	if np.abs(np.add.reduce(b.data) - 1.0) > 0.0001:
-		fB = b/np.add.reduce(b.data)
+	if np.abs(b.sum() - 1.0) > zero:
+		fB = b/b.sum()
 	else: fB = b
-	M = (a+b)/2.0
-	0.5*D(a,M)+0.5*D(b,M)
-	return np.sum(np.abs(a-b).data)
+	print fA.data, fB.data
+	M = (fA+fB)/2.0
+	print M.data
+	print kld(fA,M)
+	print kld(fB,M)
+	return 0.5*(kld(fA,M)+kld(fB,M))
 
 def chebyshev(a,b):
 	'''
