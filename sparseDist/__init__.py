@@ -84,7 +84,7 @@ def svNorm(v,p=2):
 	if p==1:
 		return np.sum(np.abs(v.data))
 	if p==2:
-		return np.sqrt(np.sum(np.power(v.data,2)))
+		return np.sqrt(np.sum(v.data**2))
 	if p==np.Inf:
 		return np.max(np.abs(v.data))
 	return np.add.reduce(np.abs(v.data)**p)**(1.0/p)
@@ -110,6 +110,19 @@ def cosine(a,b):
 
 def minkowski(a,b,p=2):
 	'''
+	>>> A = [0,2,0,1]
+	>>> B = [1,0,3,0]
+	>>> C = [0,2,3,1]
+	>>> minkowski(ss.csr_matrix([A]), ss.csr_matrix([A]))
+	0.0
+	>>> minkowski(ss.csr_matrix([A]), ss.csr_matrix([B]))
+	3.872983346207417
+	>>> minkowski(ss.csr_matrix([B]), ss.csr_matrix([A]))
+	3.872983346207417
+	>>> minkowski(ss.csr_matrix([C]), ss.csr_matrix([B]))
+	2.4494897427831779
+	>>> minkowski(ss.csr_matrix([B]), ss.csr_matrix([C]))
+	2.4494897427831779
 	'''
 	_validate_svs(a,b)
 	return svNorm(a-b,p)
@@ -160,13 +173,79 @@ def hamming(a,b):
 
 def cityblock(a,b):
 	'''
-	>>> cityblock(ss.csr_matrix([[0,2,0,1]]), ss.csr_matrix([[1,0,3,0]]))
+	>>> A = [0,2,0,1]
+	>>> B = [1,0,3,0]
+	>>> C = [0,2,3,1]
+	>>> cityblock(ss.csr_matrix([A]), ss.csr_matrix([A]))
+	0
+	>>> cityblock(ss.csr_matrix([A]), ss.csr_matrix([B]))
 	7
-	>>> cityblock(ss.csr_matrix([[0,2,3,1]]), ss.csr_matrix([[1,0,3,0]]))
+	>>> cityblock(ss.csr_matrix([B]), ss.csr_matrix([A]))
+	7
+	>>> cityblock(ss.csr_matrix([C]), ss.csr_matrix([B]))
+	4
+	>>> cityblock(ss.csr_matrix([B]), ss.csr_matrix([C]))
 	4
 	'''
 	_validate_svs(a,b)
-	return np.add.reduce(np.abs((a-b).data))
+	return np.sum(np.abs(a-b).data)
+
+def kullbackleibler(a,b):
+	'''
+	Implementation of the kullback-leibler divergance.
+	>>> A = [0,2,0,1]
+	>>> B = [1,0,3,0]
+	>>> C = [0,2,3,1]
+	>>> kullbackleibler(ss.csr_matrix([A]), ss.csr_matrix([A]))
+	0
+	>>> kullbackleibler(ss.csr_matrix([A]), ss.csr_matrix([B]))
+	7
+	>>> kullbackleibler(ss.csr_matrix([B]), ss.csr_matrix([A]))
+	7
+	>>> kullbackleibler(ss.csr_matrix([C]), ss.csr_matrix([B]))
+	4
+	>>> kullbackleibler(ss.csr_matrix([B]), ss.csr_matrix([C]))
+	4
+	'''
+	_validate_svs(a,b)
+	
+	M = (a+b)/2.0
+	0.5*D(a,M)+0.5*D(b,M)
+	return np.sum(np.abs(a-b).data)
+
+def jensenshannon(a,b):
+	'''
+	Implementation of the Jensen-Shannon divergence.
+
+	https://en.wikipedia.org/wiki/Jensen%E2%80%93Shannon_divergence
+	
+	Returns a distance in the range [0, Inf)
+
+	>>> A = [0,2,0,1]
+	>>> B = [1,0,3,0]
+	>>> C = [0,2,3,1]
+	>>> jensenshannon(ss.csr_matrix([A]), ss.csr_matrix([A]))
+	0
+	>>> jensenshannon(ss.csr_matrix([A]), ss.csr_matrix([B]))
+	7
+	>>> jensenshannon(ss.csr_matrix([B]), ss.csr_matrix([A]))
+	7
+	>>> jensenshannon(ss.csr_matrix([C]), ss.csr_matrix([B]))
+	4
+	>>> jensenshannon(ss.csr_matrix([B]), ss.csr_matrix([C]))
+	4
+	'''
+	_validate_svs(a,b)
+	## Check for frequencies
+	if np.abs(np.add.reduce(a.data) - 1.0) > 0.0001:
+		fA = a/np.add.reduce(a.data)
+	else: fA = a
+	if np.abs(np.add.reduce(b.data) - 1.0) > 0.0001:
+		fB = b/np.add.reduce(b.data)
+	else: fB = b
+	M = (a+b)/2.0
+	0.5*D(a,M)+0.5*D(b,M)
+	return np.sum(np.abs(a-b).data)
 
 def chebyshev(a,b):
 	'''
