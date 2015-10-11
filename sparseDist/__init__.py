@@ -219,7 +219,8 @@ def kld(a,b):
 	inds = np.intersect1d(a.indices, b.indices)
 	if len(inds) == 0:
 		return 1.0
-	return a[0,inds].multiply(np.log(a[0,inds]/b[0,inds])).sum()
+	aob = a[0,inds]/b[0,inds]
+	return a[0,inds].multiply(np.log(aob.data)).sum()
 
 def jensenshannon(a,b):
 	'''
@@ -229,23 +230,23 @@ def jensenshannon(a,b):
 	
 	Returns a distance in the range [0, Inf)
 
-	>>> A = [0,2,0,1]
-	>>> B = [1,0,3,0]
-	>>> C = [0,2,3,5]
-	>>> D = ss.csr_matrix([0.25, 0.5, 0.25])
-	>>> E = ss.csr_matrix([0.5, 0.3, 0.2])
-	>>> jensenshannon(ss.csr_matrix([A]), ss.csr_matrix([A]))
+	>>> A = ss.csr_matrix([[0,2,0,1]])
+	>>> B = ss.csr_matrix([[1,0,3,0]])
+	>>> C = ss.csr_matrix([[0,2,3,5]])
+	>>> D = ss.csr_matrix([[0.25, 0.5, 0.25]])
+	>>> E = ss.csr_matrix([[0.5, 0.3, 0.2]])
+	>>> jensenshannon(A, A)
 	0.0
-	>>> jensenshannon(ss.csr_matrix([A]), ss.csr_matrix([B]))
-	7
-	>>> jensenshannon(ss.csr_matrix([B]), ss.csr_matrix([A]))
-	7
+	>>> jensenshannon(A, B)
+	0.69314718055994529
+	>>> jensenshannon(B, A)
+	0.69314718055994529
 	>>> jensenshannon(D,E)
-	4
+	0.035262717451799895
 	>>> jensenshannon(E,D)
-	4
-	>>> jensenshannon(ss.csr_matrix([B]), ss.csr_matrix([C]))
-	4
+	0.035262717451799895
+	>>> jensenshannon(B, C)
+	0.37905564655268525
 	'''
 	_validate_svs(a,b)
 	## Check for frequencies
@@ -256,11 +257,7 @@ def jensenshannon(a,b):
 	if np.abs(b.sum() - 1.0) > zero:
 		fB = b/b.sum()
 	else: fB = b
-	print fA.data, fB.data
-	M = (fA+fB)/2.0
-	print M.data
-	print kld(fA,M)
-	print kld(fB,M)
+	M = (fA+fB)*0.5
 	return 0.5*(kld(fA,M)+kld(fB,M))
 
 def chebyshev(a,b):
