@@ -260,6 +260,31 @@ def jensenshannon(a,b):
 	M = (fA+fB)*0.5
 	return 0.5*(kld(fA,M)+kld(fB,M))
 
+def jaccard(a,b):
+	'''
+	Implementation of the Jeccard index for sparse vectors.
+
+	Returns a distance in the range [0, 1].
+
+	>>> A = ss.csr_matrix([[0,2,0,1]])
+	>>> B = ss.csr_matrix([[1,0,3,0]])
+	>>> C = ss.csr_matrix([[0,2,3,5]])
+	>>> D = ss.csr_matrix([[0.25, 0.5, 0.25]])
+	>>> E = ss.csr_matrix([[0.5, 0.3, 0.2]])
+	>>> jaccard(A, A)
+	1.0
+	>>> jaccard(A, B)
+	0.0
+	>>> jaccard(B, A)
+	0.0
+	>>> jaccard(B, C)
+	0.25
+	'''
+	_validate_svs(a,b)
+	intersect = len(np.intersect1d(a.indices, b.indices))
+	union = len(np.union1d(a.indices, b.indices))
+	return np.float(intersect)/np.float(union)
+
 def chebyshev(a,b):
 	'''
 	>>> A = [0,2,0,1]
