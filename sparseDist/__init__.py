@@ -220,7 +220,7 @@ def kld(a,b):
 	if len(inds) == 0:
 		return 1.0
 	aob = a[0,inds]/b[0,inds]
-	return a[0,inds].multiply(np.log(aob.data)).sum()
+	return a[0,inds].multiply(np.log(aob)).sum()
 
 def jensenshannon(a,b):
 	'''
